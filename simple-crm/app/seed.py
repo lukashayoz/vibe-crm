@@ -3,7 +3,7 @@ Seed script to populate the database with initial data.
 """
 import random
 from decimal import Decimal
-from models import db, Lead
+from app.models import db, Lead
 
 # Sample lead titles
 LEAD_TITLES = [
