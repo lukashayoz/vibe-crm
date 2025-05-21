@@ -42,7 +42,9 @@ For production use, set the `DATABASE_URL` environment variable to your producti
 
 ## Running Tests
 
-To run the tests:
+### Unit Tests
+
+To run the unit tests:
 
 ```bash
 # Install test dependencies
@@ -51,3 +53,25 @@ pip install pytest
 # Run tests
 pytest
 ```
+
+### End-to-End Tests
+
+To run the end-to-end tests:
+
+```bash
+# Install Playwright and dependencies
+npm install
+npx playwright install --with-deps chromium
+
+# Run the E2E tests
+npm run test:e2e
+```
+
+## CI/CD
+
+This project uses GitHub Actions for continuous integration:
+
+1. **Unit Tests** - Run on every pull request and push to main
+2. **E2E Tests** - Run on every pull request and push to main using Playwright
+
+The workflows are defined in `.github/workflows/`.

@@ -1,0 +1,12 @@
+{
+  "name": "simple-crm",
+  "version": "1.0.0",
+  "description": "Simple CRM application for demo purposes",
+  "scripts": {
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@playwright/test": "^1.40.0"
+  }
+}
