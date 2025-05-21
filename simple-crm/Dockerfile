@@ -11,10 +11,10 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 # 5. Copy the app directory
-COPY app ./app
+COPY app/ .
 
 # 6. Expose port 5000
 EXPOSE 5000
 
 # 7. Specify the command to run the application
-CMD ["python", "app/main.py"]
+CMD ["python", "main.py"]
