@@ -12,18 +12,18 @@ jobs:
     
     services:
       postgres:
-        image: postgres:14
+        image: postgres:${{ fromJson(github.workspace == '' && '14' || fromJson(readFile('.github/workflow-config.json')).postgres.version }}
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: crm_test
+          POSTGRES_USER: ${{ fromJson(github.workspace == '' && 'postgres' || fromJson(readFile('.github/workflow-config.json')).postgres.user }}
+          POSTGRES_PASSWORD: ${{ fromJson(github.workspace == '' && 'postgres' || fromJson(readFile('.github/workflow-config.json')).postgres.password }}
+          POSTGRES_DB: ${{ fromJson(github.workspace == '' && 'crm_test' || fromJson(readFile('.github/workflow-config.json')).postgres.db_name }}
         ports:
-          - 5432:5432
+          - ${{ fromJson(github.workspace == '' && '5432:5432' || fromJson(readFile('.github/workflow-config.json')).postgres.port + ':' + fromJson(readFile('.github/workflow-config.json')).postgres.port }}
         options: >-
           --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-interval ${{ fromJson(github.workspace == '' && '10s' || fromJson(readFile('.github/workflow-config.json')).postgres.health_interval }}
+          --health-timeout ${{ fromJson(github.workspace == '' && '5s' || fromJson(readFile('.github/workflow-config.json')).postgres.health_timeout }}
+          --health-retries ${{ fromJson(github.workspace == '' && '5' || fromJson(readFile('.github/workflow-config.json')).postgres.health_retries }}
     
     steps:
       - name: Check out code
@@ -32,7 +32,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: ${{ fromJson(github.workspace == '' && '3.9' || fromJson(readFile('.github/workflow-config.json')).python_version }}
           
       - name: Install Python dependencies
         working-directory: ./simple-crm
@@ -43,7 +43,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: ${{ fromJson(github.workspace == '' && '16' || fromJson(readFile('.github/workflow-config.json')).node_version }}
       
       - name: Install Playwright
         working-directory: ./simple-crm
