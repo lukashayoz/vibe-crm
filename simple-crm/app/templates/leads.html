@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Leads - Simple CRM{% endblock %}
+
+{% block content %}
+    <div class="header">
+        <h1>Leads</h1>
+        <p>View all your potential business opportunities.</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Amount</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lead in leads %}
+            <tr>
+                <td>{{ lead.id }}</td>
+                <td>{{ lead.title }}</td>
+                <td>${{ lead.amount }}</td>
+                <td>{{ lead.created_at.strftime('%Y-%m-%d') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
