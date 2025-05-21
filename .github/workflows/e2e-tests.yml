@@ -12,18 +12,18 @@ jobs:
     
     services:
       postgres:
-        image: postgres:${{ fromJson(github.workspace == '' && '14' || fromJson(readFile('.github/workflow-config.json')).postgres.version }}
+        image: postgres:14
         env:
-          POSTGRES_USER: ${{ fromJson(github.workspace == '' && 'postgres' || fromJson(readFile('.github/workflow-config.json')).postgres.user }}
-          POSTGRES_PASSWORD: ${{ fromJson(github.workspace == '' && 'postgres' || fromJson(readFile('.github/workflow-config.json')).postgres.password }}
-          POSTGRES_DB: ${{ fromJson(github.workspace == '' && 'crm_test' || fromJson(readFile('.github/workflow-config.json')).postgres.db_name }}
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: crm_test
         ports:
-          - ${{ fromJson(github.workspace == '' && '5432:5432' || fromJson(readFile('.github/workflow-config.json')).postgres.port + ':' + fromJson(readFile('.github/workflow-config.json')).postgres.port }}
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
-          --health-interval ${{ fromJson(github.workspace == '' && '10s' || fromJson(readFile('.github/workflow-config.json')).postgres.health_interval }}
-          --health-timeout ${{ fromJson(github.workspace == '' && '5s' || fromJson(readFile('.github/workflow-config.json')).postgres.health_timeout }}
-          --health-retries ${{ fromJson(github.workspace == '' && '5' || fromJson(readFile('.github/workflow-config.json')).postgres.health_retries }}
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     
     steps:
       - name: Check out code
@@ -32,7 +32,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ fromJson(github.workspace == '' && '3.9' || fromJson(readFile('.github/workflow-config.json')).python_version }}
+          python-version: 3.9
           
       - name: Install Python dependencies
         working-directory: ./simple-crm
@@ -43,14 +43,22 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ fromJson(github.workspace == '' && '16' || fromJson(readFile('.github/workflow-config.json')).node_version }}
+          node-version: 16
       
-      - name: Install Playwright
+      - name: Install Playwright dependencies
         working-directory: ./simple-crm
         run: |
-          npm init -y
-          npm install -D @playwright/test
+          npm ci || npm install
           npx playwright install --with-deps chromium
+      
+      - name: Start Flask application
+        working-directory: ./simple-crm
+        env:
+          FLASK_ENV: testing
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/crm_test
+        run: |
+          python -m app.main &
+          sleep 5 # Wait for app to start
       
       - name: Run Playwright tests
         working-directory: ./simple-crm

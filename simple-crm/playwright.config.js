@@ -41,9 +41,9 @@ module.exports = defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'cd /home/runner/work/vibe-crm/vibe-crm/simple-crm && python -m app.main',
+  webServer: process.env.CI ? undefined : {
+    command: 'python -m app.main',
     url: 'http://localhost:5000',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
   },
 });
