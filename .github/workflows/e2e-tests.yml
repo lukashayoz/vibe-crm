@@ -58,7 +58,9 @@ jobs:
           TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/crm_test
         run: |
           python -m app.main &
-          sleep 5 # Wait for app to start
+          sleep 10 # Wait longer for app to start
+          # Check if the app is running
+          curl -s http://localhost:5000 || echo "App not responding"
       
       - name: Run Playwright tests
         working-directory: ./simple-crm

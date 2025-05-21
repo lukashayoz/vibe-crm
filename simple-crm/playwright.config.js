@@ -41,7 +41,12 @@ module.exports = defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: process.env.CI ? undefined : {
+  webServer: process.env.CI ? {
+    command: 'python -m app.main',
+    url: 'http://localhost:5000',
+    timeout: 120 * 1000,
+    reuseExistingServer: true,
+  } : {
     command: 'python -m app.main',
     url: 'http://localhost:5000',
     reuseExistingServer: true,
