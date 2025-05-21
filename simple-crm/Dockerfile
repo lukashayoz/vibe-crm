@@ -17,4 +17,4 @@ COPY app ./app
 EXPOSE 5000
 
 # 7. Specify the command to run the application
-CMD ["python", "app/main.py"]
+CMD ["python", "main.py"]
