@@ -22,7 +22,7 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     """Testing configuration."""
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = os.getenv('TEST_DATABASE_URL', 'postgresql://postgres:postgres@db:5432/crm_test')
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
 
 # Configuration dictionary
 config = {

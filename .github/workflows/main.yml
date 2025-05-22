@@ -1,11 +1,9 @@
-name: Docker Image CI
+name: CI Pipeline
 
-on:
-  push:
-    branches: [ "main" ]
+on: [push, pull_request]
 
 jobs:
-  build_docker_image:
+  build_and_check_docker:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -21,3 +19,80 @@ jobs:
           file: ./simple-crm/Dockerfile
           push: false
           tags: simple-crm-demo:latest
+
+  run_unit_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9' 
+          cache: 'pip' # Caches pip dependencies
+
+      - name: Install dependencies
+        run: |
+          pip install -r simple-crm/requirements.txt
+          # pytest is already in requirements.txt, so no need to install separately
+
+      - name: Run unit tests
+        run: pytest simple-crm/tests/test_app.py
+
+  run_e2e_tests:
+    runs-on: ubuntu-latest
+    # Optional: Add dependency if build must pass first
+    # needs: build_and_check_docker 
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+
+      - name: Install Google Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Install ChromeDriver
+        run: |
+          CHROME_VERSION=$(google-chrome --version | awk '{print $3}')
+          echo "Installed Chrome version: $CHROME_VERSION"
+          # Attempt to get the major version for LATEST_RELEASE endpoint
+          CHROME_MAJOR_VERSION=$(echo $CHROME_VERSION | cut -d'.' -f1)
+          echo "Detected Chrome major version: $CHROME_MAJOR_VERSION"
+          
+          # Fetch the specific ChromeDriver version for the installed Chrome major version
+          # Fallback to LATEST_RELEASE if specific version not found or if issues arise
+          DRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_MAJOR_VERSION})
+          if [ -z "$DRIVER_VERSION" ]; then
+            echo "Could not find specific ChromeDriver version for Chrome $CHROME_MAJOR_VERSION. Falling back to LATEST_RELEASE for general Chrome version."
+            DRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$(google-chrome --version | cut -d' ' -f3))
+          fi
+          if [ -z "$DRIVER_VERSION" ]; then
+            echo "Error: Could not determine ChromeDriver version."
+            exit 1
+          fi
+          echo "Determined ChromeDriver version: $DRIVER_VERSION"
+
+          wget -N http://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip -P ~/
+          unzip ~/chromedriver_linux64.zip -d ~/
+          rm ~/chromedriver_linux64.zip
+          sudo mv -f ~/chromedriver /usr/local/bin/chromedriver
+          sudo chmod +x /usr/local/bin/chromedriver
+          echo "ChromeDriver installed to /usr/local/bin/chromedriver"
+          chromedriver --version
+
+      - name: Install dependencies
+        run: |
+          pip install -r simple-crm/requirements.txt
+          # selenium and pytest are already in requirements.txt
+
+      - name: Run E2E tests
+        working-directory: ./simple-crm # Ensure pytest is run from a context where it can find simple_crm package
+        run: pytest tests/test_e2e.py
