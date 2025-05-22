@@ -1,9 +1,9 @@
 import os
 from flask import Flask, render_template
 from flask_migrate import Migrate
-from models import db, Lead
-from seed import run_seed
-from config import config
+from app.models import db, Lead
+from app.seed import run_seed
+from app.config import config
 
 def create_app(config_name="default"):
     """Create and configure an instance of the Flask application."""

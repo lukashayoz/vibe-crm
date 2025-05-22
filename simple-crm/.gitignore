@@ -11,3 +11,10 @@ instance/
 
 # Virtual Environment
 venv/
+
+# Node.js and Playwright
+node_modules/
+package-lock.json
+/test-results/
+/playwright-report/
+/playwright/.cache/
